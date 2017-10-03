@@ -1,0 +1,263 @@
+---
+title: "Assignment3"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Create a R Markdown powered Web Application w/ R & Shiny:
+### Share it with github
+
+1. **README (10 pt) file in top level directory.** 
++ The readme will contain your name
+2. **LICENSE** An MIT License (10 pt)**
+3. **original** Directory containing assignment named original
+4. **original/index.Rmd** File containing the text here without editing
+5. **index.Rmd**  R markup file containing your completed homework
+6. **data** A directory containing data we will use
+7. **data/gene_id2gene.tsv.gz** A file containing gene_id and gene mapping
+8. **data/cohort.tpms.csv.gz** A file containing expression levels for a set of samples
+
+
+# Question 1
+
+## Question 1 Background
+We will use example data from R, the iris dataset.  For the assignment, I'll ask for you to complete things from the diamonds or iris dataset. These are preloaded datasets
+
+data(diamonds)
+summary(diamonds)
+  
+```{r}
+  library('rmarkdown')
+  library("ggplot2")
+  library("plotly")
+  library("DT")
+  diamonds<-diamonds
+  iris<-iris
+  summary(iris)
+```
+
+
+### Question 1 Background: Analysis of our iris dataset
+Example functions and how to use them to calculate some stats manually.
+Remember one can look these up online.
+
+```{r}
+# Calculates the mean values for the aggregates given by the Species column in the iris data set.
+ iris_mean <- aggregate(iris[,1:4], by=list(Species=iris$Species), FUN=mean)
+# Calculates the standard deviations for the aggregates given by the Species column in the iris data set.
+ iris_sd <- aggregate(iris[,1:4], by=list(Species=iris$Species), FUN=sd)
+ convertDF <- function(df=df, mycolnames=c("Species", "Values", "Samples")) { myfactor <- rep(colnames(df)[-1], each=length(df[,1]));
+# Defines function to convert data frames into ggplot2-friendly format.
+mydata <- as.vector(as.matrix(df[,-1])); df <- data.frame(df[,1], mydata, myfactor); colnames(df) <- mycolnames; return(df) }
+# Converts iris_mean.
+ df_mean <- convertDF(iris_mean, mycolnames=c("Species", "Values", "Samples"))
+# Converts iris_sd.
+ df_sd <- convertDF(iris_sd, mycolnames=c("Species", "Values", "Samples"))
+# Define standard deviation limits.
+ limits <- aes(ymax = df_mean[,2] + df_sd[,2], ymin=df_mean[,2] - df_sd[,2])
+```
+
+## **Question 1** (20 Points): 
+1. Please put the Mean Petal Length into mean_petal_length variable
+ + mean_petal_length <- mean(iris$'petal.length') 3.758
+2. Please put the Max Petal Length max_petal_length variable
++ max_petal_length <- max(iris$'petal.length') 6.9
+3. How many vectors (columns) are there in Iris and what are there names?
++ There are 5 Columns. Sepal.Length, Sepal.width, Petal.length, petal.width
+ncol(iris)
+names(iris)
+```{r}
+mean_petal_length <- mean(iris$'Petal.Length')
+
+mean_petal_length
+
+max_petal_length <- max(iris$'Petal.Length')
+
+max_petal_length
+
+ncol(iris)
+
+names(iris)
+
+```
+
+
+# Question 2
+
+
+
+
+
+### Question 2 Background
+
+### Question 2 Background: Examples with *ggplot2*
+
+  Ploting two vectors (columns) in form of a scatter plot against each other and places into a png image called *twovectors.png* in the images directory.  Make sure you have made your directory
+  
+```{r}
+dir.create('images')
+ggplot(iris, aes(Sepal.Length, Sepal.Width)) + geom_point()
+png('images/twovectors.png')
+ggplot(iris, aes(Sepal.Length, Sepal.Width)) + geom_point()
+dev.off()
+```
+
+### Question 2 Background Example A: Plots larger dots and colors them with default color scheme.
+
+```{r example1}
+example1 <- ggplot(iris, aes(Sepal.Length, Sepal.Width)) + geom_point(aes(color = Species), size=4)
+return(example1)
+```
+
+### Question 2 Background Example B: Colors dots with custom scheme.
+```{r example2}
+example2 <- ggplot(iris, aes(Sepal.Length, Sepal.Width)) + geom_point(aes(color = Species), size=4) + ylim(2,4) + xlim(4,8) + scale_color_manual(values=rainbow(10))
+return(example2)
+```
+
+### Question 2 Background Example C: Adds a regression line to the plot.
+```{r example3}
+example3 <- ggplot(iris, aes(Sepal.Length, Sepal.Width)) + geom_point() + stat_smooth(method="lm", se=FALSE) + ylim(2,4) + xlim(4,8) + scale_color_manual(values=rainbow(10))
+return(example3)
+```
+### Question 2 Background Example D: Plots three line plots, one for each sample in Species column.
+```{r example4}
+example4 <- ggplot(iris, aes(Sepal.Length, Sepal.Width)) + geom_line(aes(color=Species), size=1) + facet_wrap(~Species, ncol=1)
+return(example4)
+```
+
+### Question 2 Background Example E: Plots with q plot
+Qplot is another way to do ggplot2, but a bit simpler
+```{r example5}
+example5<-qplot(Sepal.Length, Petal.Length, data = iris, color = Species, size = Petal.Width)
+return(example5)
+```
+
+
+### Question 2 Background Example F
+#### Same with ggplot & _Plotly_
+
+```{r example6}
+a<-ggplot(iris, aes(x = Sepal.Length, y = Petal.Length, color=Species)) + geom_point() + facet_wrap(~Species) + ggtitle("Plot of sepal length vs. petal length")
+example6<-ggplotly(a)
+return(example6)
+```
+
+## **Question 2** (20 Points): 
+Using **diamonds** instead of **iris** model data place graph of carat (x-axis) vs. price (y-axis), color by clarity, facet by cut with a title (Based on Example 2F).
+
+```{r Answer to Question 2 carat vs. price}
+diamonds<-diamonds
+b<-ggplot(diamonds, aes(carat, price, color=clarity)) + geom_point() + facet_wrap(~cut) + ggtitle("Plot of Carat vs. Price")
+return(b)
+
+```
+
+
+# **Question 3** 
+
+### Question 3 Background Building a Widget
+*Lets create our inputs (remember to make these code)*
+
+<pre>
+inputPanel(
+  selectInput("var1", label = "Choose Xaxis:", 
+     choices = c("Sepal.Length","Petal.Length"), selected = "Petal.Length"
+     ),
+  selectInput("var2",  label = "Choose Yaxis:", 
+     choices = c("Sepal.Width","Petal.Width"), selected = "Petal.Width"
+     )
+)
+</pre>
+*Lets create our outputs (remember to make these code)*
+
+<pre>
+renderPlot({
+  x_axis <- input$var1
+  y_axis <- input$var2
+  species <- "Species"
+  example13<-ggplot(iris, aes_string(x = x_axis, y = y_axis, color=species)) +
+      geom_point() + facet_wrap(~Species) + ggtitle("Plot of sepal length vs. petal length")
+  example13
+})
+</pre>
+
+### Example 3A
+```{r echo = FALSE}
+inputPanel(
+  selectInput("var1", label = "Choose Xaxis:", choices = c("Sepal.Length","Petal.Length"), selected = "Petal.Length"),
+  selectInput("var2",  label = "Choose Yaxis:", choices = c("Sepal.Width","Petal.Width"), selected = "Petal.Width")
+)
+```
+
+
+```{r  echo = FALSE}
+library(plotly)
+renderPlotly({
+  x_axis <- input$var1
+  y_axis <- input$var2
+  species <- "Species"
+   a<-ggplot(iris, aes_string(x = x_axis, y = y_axis, color=species)) + geom_point() + facet_wrap(~Species) + ggtitle("Plot of sepal length vs. petal length")
+   ggplotly(a)
+}) 
+```
+
+## **Question 3** (20 Points): 
+Make a similar shiny app, based on 3A with **diamonds** modelset allowing changing of axis.
+
+```{r echo = FALSE}
+inputPanel(
+  selectInput("var3", label = "Choose Xaxis:", choices = c("carat","x", "y"), selected = "carat"),
+  selectInput("var4",  label = "Choose Yaxis:", choices = c("depth","table", "price"), selected = "price")
+)
+
+```
+
+```{r echo = FALSE}
+dia<-diamonds
+library(plotly)
+renderPlotly({
+  x_axis <- input$var3
+  y_axis <- input$var4
+  "Clarity" <- "Clarity"
+  ve<-ggplot(dia, aes_string(x = x_axis, y = y_axis, color="clarity")) + geom_point() + facet_wrap(~clarity) + ggtitle("Plot of Carat vs. Price")
+   ggplotly(ve) 
+   })
+```
+
+
+
+
+
+
+<!-- End of Assignment -->
+
+<!-- The text below is just to reformat the page, using css styling -->
+```{r results="asis", echo = FALSE}
+cat("
+<style>
+h1 {
+    background-color: #990000;
+    color:#FFF;
+    text-align:center;
+}
+h2 {
+   background-color:#f3d6d6;
+   text-align:center;
+   color:#333
+}
+h3 {
+   margin-left:-5px;
+   text-align:center;
+   color:#333
+}
+
+</style>
+")
+```
+
+
